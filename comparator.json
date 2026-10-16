@@ -1,0 +1,17 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "TuranStability.card_edgeSet_add_le",
+    "TuranStability.furedi",
+    "TuranStability.exists_partition_symmDiff_le",
+    "TuranStability.erdos_simonovits_stability"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": true
+}
