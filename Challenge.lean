@@ -8,25 +8,26 @@ module
 public import Mathlib
 
 /-!
-# Füredi's stability theorem for Turán's theorem
+# Füredi's stability theorem and the Erdős–Simonovits stability theorem
 
-For a finite simple graph `G` and a map `f : V → Fin p`, the graph
-`(⊤ : SimpleGraph (Fin p)).comap f` is the complete `p`-partite graph whose parts are the fibres
-of `f`; `G \ (⊤.comap f)` consists of the edges of `G` inside the parts.
+Statements (namespace `TuranStability`):
 
-* `TuranStability.card_edgeSet_add_le`: **Füredi (2015), partition inequality.** If `G` is
-  `K_{p+1}`-free, there is a partition `f` with `e(G) + Σᵢ e(G[Vᵢ]) ≤ e(K(V₁, …, V_p))`.
-* `TuranStability.furedi`: **Füredi (2015).** A `K_{p+1}`-free graph with at least
-  `turanNumber n p - t` edges has a `p`-partite subgraph with at least `e(G) - t` edges.
-* `TuranStability.exists_partition_symmDiff_le`: such a graph is at edit distance at most `3 t`
-  from a complete `p`-partite graph, with at most `t` edges inside the parts.
-* `TuranStability.erdos_simonovits_stability`: **Erdős–Simonovits stability for cliques.** For
-  every `ε > 0` there is `δ > 0` such that every `K_{p+1}`-free graph with at least
-  `(1 - 1/p) n² / 2 - δ n²` edges can be turned into a complete `p`-partite graph by changing
-  at most `ε n²` edges.
+* Füredi (2015), for cliques: `card_edgeSet_add_le` (partition inequality), `furedi` (a
+  `K_{p+1}`-free graph with at least `turanNumber n p - t` edges has a `p`-partite subgraph with at
+  least `e(G) - t` edges), `exists_partition_symmDiff_le` (edit distance at most `3 t`) and
+  `erdos_simonovits_stability` (the Erdős–Simonovits stability theorem for `K_{p+1}`).
+* The clique counting lemma in `ε`-uniform parts: `card_transversalCliques_ge`,
+  `card_transversalCliques_ge_of_isUniform`, `card_cliqueFinset_ge`.
+* The clique removal lemma: `le_card_cliqueFinset_of_deleteFar`, `clique_removal`.
+* The embedding lemma: `exists_embedding`, `exists_embedding_of_isUniform`,
+  `isContained_of_isUniform`.
+* The Erdős–Simonovits stability theorem for every `(p + 1)`-colourable forbidden graph `L`:
+  `stability`.
 
-The Mathlib definitions used in these statements are reproduced verbatim, with file and line at the
-pinned Mathlib revision, in `MATHLIB_DEFINITIONS.md` at the root of this repository.
+A partition into `p` parts is a map `f : V → Fin p`; its complete `p`-partite graph is
+`(⊤ : SimpleGraph (Fin p)).comap f`. The Mathlib definitions used in these statements are
+reproduced verbatim, with file and line at the pinned Mathlib revision, in `MATHLIB_DEFINITIONS.md`
+at the root of this repository.
 -/
 
 @[expose] public section
@@ -34,6 +35,8 @@ pinned Mathlib revision, in `MATHLIB_DEFINITIONS.md` at the root of this reposit
 open Finset Fintype SimpleGraph
 
 namespace TuranStability
+
+section Furedi
 
 variable {V : Type*} [Fintype V]
 
@@ -75,5 +78,135 @@ theorem erdos_simonovits_stability {p : ℕ} (hp : 0 < p) {ε : ℝ} (hε : 0 < 
         ((symmDiff G ((⊤ : SimpleGraph (Fin p)).comap f)).edgeSet.ncard : ℝ) ≤
           ε * (card W : ℝ) ^ 2 := by
   sorry
+
+end Furedi
+
+section CliqueCounting
+
+variable {α : Type*} (G : SimpleGraph α) [DecidableRel G.Adj]
+
+/-- **Clique counting lemma, robust-density form.** If any two of the parts `s i`, `s j`
+(`i ≠ j`) have edge density at least `d` between all subsets of relative size at least `η`,
+`η ≤ 1` and `2 r η ≤ d ^ (r - 1)`, then at least `d ^ (r choose 2) / 2 ^ r` of the tuples in
+`∏ i, s i` are cliques. (Without `η ≤ 1` the hypothesis on subsets would be vacuous.) -/
+theorem card_transversalCliques_ge {r : ℕ} (s : Fin r → Finset α) {η d : ℝ} (hη : 0 < η)
+    (hη₁ : η ≤ 1) (hd : 0 < d) (hηd : 2 * r * η ≤ d ^ (r - 1))
+    (hs : ∀ i j, i ≠ j → ∀ A ⊆ s i, ∀ B ⊆ s j, η * #(s i) ≤ #A → η * #(s j) ≤ #B →
+      d ≤ G.edgeDensity A B) :
+    d ^ r.choose 2 / 2 ^ r * ∏ i, (#(s i) : ℝ) ≤
+      #{x ∈ Fintype.piFinset s | ∀ i j, i ≠ j → G.Adj (x i) (x j)} := by
+  sorry
+
+/-- **Clique counting lemma, uniform form.** If every pair of distinct parts is `ε`-uniform with
+edge density at least `d + ε`, and `2 r ε ≤ d ^ (r - 1)`, then at least
+`d ^ (r choose 2) / 2 ^ r` of the tuples in `∏ i, s i` are cliques. -/
+theorem card_transversalCliques_ge_of_isUniform {r : ℕ} (s : Fin r → Finset α) {ε d : ℝ}
+    (hε : 0 < ε) (hd : 0 < d) (hεd : 2 * r * ε ≤ d ^ (r - 1))
+    (hu : ∀ i j, i ≠ j → G.IsUniform ε (s i) (s j))
+    (hdens : ∀ i j, i ≠ j → d + ε ≤ G.edgeDensity (s i) (s j)) :
+    d ^ r.choose 2 / 2 ^ r * ∏ i, (#(s i) : ℝ) ≤
+      #{x ∈ Fintype.piFinset s | ∀ i j, i ≠ j → G.Adj (x i) (x j)} := by
+  sorry
+
+/-- **Clique counting lemma.** If `s : Fin r → Finset α` are pairwise disjoint sets of vertices,
+every two of them `ε`-uniform with edge density at least `d + ε`, and `2 r ε ≤ d ^ (r - 1)`,
+then `G` has at least `d ^ (r choose 2) / 2 ^ r · ∏ i, #(s i)` cliques of size `r`. -/
+theorem card_cliqueFinset_ge [Fintype α] [DecidableEq α] {r : ℕ} (s : Fin r → Finset α)
+    {ε d : ℝ} (hε : 0 < ε) (hd : 0 < d) (hεd : 2 * r * ε ≤ d ^ (r - 1))
+    (hdisj : ∀ i j, i ≠ j → Disjoint (s i) (s j))
+    (hu : ∀ i j, i ≠ j → G.IsUniform ε (s i) (s j))
+    (hdens : ∀ i j, i ≠ j → d + ε ≤ G.edgeDensity (s i) (s j)) :
+    d ^ r.choose 2 / 2 ^ r * ∏ i, (#(s i) : ℝ) ≤ #(G.cliqueFinset r) := by
+  sorry
+
+end CliqueCounting
+
+section CliqueRemoval
+
+/-- **Clique removal lemma, far form.** For every `r` and `ε > 0` there is `δ > 0` such that a
+finite graph on `n` vertices that is `ε n²`-far from being `K_r`-free (in the sense of Mathlib's
+`SimpleGraph.DeleteFar`) has at least `δ n^r` cliques of size `r`. -/
+theorem le_card_cliqueFinset_of_deleteFar (r : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ (α : Type) [Fintype α] [DecidableEq α] (G : SimpleGraph α)
+      [DecidableRel G.Adj], G.DeleteFar (fun H ↦ H.CliqueFree r) (ε * (card α ^ 2 : ℕ)) →
+        δ * card α ^ r ≤ #(G.cliqueFinset r) := by
+  sorry
+
+/-- **Clique removal lemma.** For every `r` and `ε > 0` there is `δ > 0` such that every finite
+graph on `n` vertices with fewer than `δ n^r` cliques of size `r` has a `K_r`-free subgraph
+obtained by deleting fewer than `ε n²` edges. -/
+theorem clique_removal (r : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ (α : Type) [Fintype α] [DecidableEq α] (G : SimpleGraph α)
+      [DecidableRel G.Adj], (#(G.cliqueFinset r) : ℝ) < δ * card α ^ r →
+        ∃ G' ≤ G, ∃ _ : DecidableRel G'.Adj,
+          (#G.edgeFinset - #G'.edgeFinset : ℝ) < ε * (card α ^ 2 : ℕ) ∧ G'.CliqueFree r := by
+  sorry
+
+end CliqueRemoval
+
+section Embedding
+
+variable {α : Type*} (G : SimpleGraph α) [DecidableRel G.Adj]
+
+/-- **Embedding lemma, robust-density form.** Let `L` be a graph on a finite type `β` with
+`k = card β` vertices and a proper colouring `c : β → Fin r`. Suppose that for all colours
+`i ≠ j`, all subsets `A ⊆ s i`, `B ⊆ s j` with `#A ≥ η #(s i)` and `#B ≥ η #(s j)` have edge
+density at least `d`, where `0 < η ≤ 1`, `0 < d ≤ 1`, `2 k η ≤ d ^ k`, and every part has at least
+`2 k / d ^ k` vertices. Then there is an injective map `f : β → α` sending each `x` into `s (c x)`
+and edges of `L` to edges of `G`. -/
+theorem exists_embedding {β : Type*} [Fintype β] (L : SimpleGraph β) {r : ℕ}
+    (c : β → Fin r) (hc : ∀ x y, L.Adj x y → c x ≠ c y) (s : Fin r → Finset α) {η d : ℝ}
+    (hη : 0 < η) (hη₁ : η ≤ 1) (hd : 0 < d) (hd₁ : d ≤ 1)
+    (hηd : 2 * card β * η ≤ d ^ card β) (hsize : ∀ i, 2 * card β ≤ d ^ card β * #(s i))
+    (hs : ∀ i j, i ≠ j → ∀ A ⊆ s i, ∀ B ⊆ s j, η * #(s i) ≤ #A → η * #(s j) ≤ #B →
+      d ≤ G.edgeDensity A B) :
+    ∃ f : β → α, Function.Injective f ∧ (∀ x, f x ∈ s (c x)) ∧
+      ∀ x y, L.Adj x y → G.Adj (f x) (f y) := by
+  sorry
+
+/-- **Embedding lemma, uniform form.** Under the hypotheses of `exists_embedding`, with the
+robust density condition replaced by: every pair of distinct parts is `ε`-uniform with edge
+density at least `d + ε`, and `2 k ε ≤ d ^ k`. -/
+theorem exists_embedding_of_isUniform {β : Type*} [Fintype β]
+    (L : SimpleGraph β) {r : ℕ} (c : β → Fin r) (hc : ∀ x y, L.Adj x y → c x ≠ c y)
+    (s : Fin r → Finset α) {ε d : ℝ} (hε : 0 < ε) (hd : 0 < d) (hd₁ : d ≤ 1)
+    (hεd : 2 * card β * ε ≤ d ^ card β) (hsize : ∀ i, 2 * card β ≤ d ^ card β * #(s i))
+    (hu : ∀ i j, i ≠ j → G.IsUniform ε (s i) (s j))
+    (hdens : ∀ i j, i ≠ j → d + ε ≤ G.edgeDensity (s i) (s j)) :
+    ∃ f : β → α, Function.Injective f ∧ (∀ x, f x ∈ s (c x)) ∧
+      ∀ x y, L.Adj x y → G.Adj (f x) (f y) := by
+  sorry
+
+/-- **Embedding lemma, containment form.** Under the hypotheses of
+`exists_embedding_of_isUniform`, `L` is contained in `G` (`L ⊑ G`, Mathlib's
+`SimpleGraph.IsContained`). -/
+theorem isContained_of_isUniform {β : Type*} [Fintype β]
+    (L : SimpleGraph β) {r : ℕ} (c : β → Fin r) (hc : ∀ x y, L.Adj x y → c x ≠ c y)
+    (s : Fin r → Finset α) {ε d : ℝ} (hε : 0 < ε) (hd : 0 < d) (hd₁ : d ≤ 1)
+    (hεd : 2 * card β * ε ≤ d ^ card β) (hsize : ∀ i, 2 * card β ≤ d ^ card β * #(s i))
+    (hu : ∀ i j, i ≠ j → G.IsUniform ε (s i) (s j))
+    (hdens : ∀ i j, i ≠ j → d + ε ≤ G.edgeDensity (s i) (s j)) :
+    L.IsContained G := by
+  sorry
+
+end Embedding
+
+section ErdosSimonovits
+
+/-- **Erdős–Simonovits stability theorem.** Let `L` be a finite graph that is
+`(p + 1)`-colourable. For every `ε > 0` there are `δ > 0` and `n₀` such that every graph `G` on
+`n ≥ n₀` vertices that does not contain `L` and has at least `(1 - 1/p) n² / 2 - δ n²` edges
+differs from some complete `p`-partite graph on the same vertices in at most `ε n²` edges. -/
+theorem stability {β : Type} [Finite β] (L : SimpleGraph β) {p : ℕ} (hp : 0 < p)
+    (hL : L.Colorable (p + 1)) {ε : ℝ} (hε : 0 < ε) :
+    ∃ δ : ℝ, 0 < δ ∧ ∃ n₀ : ℕ, ∀ (W : Type) [Fintype W] (G : SimpleGraph W), n₀ ≤ card W →
+      ¬ L.IsContained G →
+      (1 - 1 / (p : ℝ)) * (card W : ℝ) ^ 2 / 2 - δ * (card W : ℝ) ^ 2 ≤ G.edgeSet.ncard →
+      ∃ f : W → Fin p,
+        ((symmDiff G ((⊤ : SimpleGraph (Fin p)).comap f)).edgeSet.ncard : ℝ) ≤
+          ε * (card W : ℝ) ^ 2 := by
+  sorry
+
+end ErdosSimonovits
 
 end TuranStability

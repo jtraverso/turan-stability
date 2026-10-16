@@ -5,7 +5,16 @@
     "TuranStability.card_edgeSet_add_le",
     "TuranStability.furedi",
     "TuranStability.exists_partition_symmDiff_le",
-    "TuranStability.erdos_simonovits_stability"
+    "TuranStability.erdos_simonovits_stability",
+    "TuranStability.card_transversalCliques_ge",
+    "TuranStability.card_transversalCliques_ge_of_isUniform",
+    "TuranStability.card_cliqueFinset_ge",
+    "TuranStability.le_card_cliqueFinset_of_deleteFar",
+    "TuranStability.clique_removal",
+    "TuranStability.exists_embedding",
+    "TuranStability.exists_embedding_of_isUniform",
+    "TuranStability.isContained_of_isUniform",
+    "TuranStability.stability"
   ],
   "definition_names": [],
   "permitted_axioms": [

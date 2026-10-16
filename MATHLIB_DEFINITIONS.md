@@ -1,4 +1,4 @@
-# Mathlib definitions used in Challenge.lean (Füredi's stability theorem)
+# Mathlib definitions used in Challenge.lean (Füredi and Erdős–Simonovits stability)
 
 Verbatim excerpts of the Mathlib definitions used by the statements in `Challenge.lean`, at the
 pinned Mathlib revision `c55e6e786f49471c72fbddbec5415808896aec1e` (tag `v4.35.0-rc3`, repository
@@ -115,6 +115,16 @@ This is an abbreviation for `edgeSetEmbedding G` that permits dot notation. -/
 abbrev edgeSet (G : SimpleGraph V) : Set (Sym2 V) := edgeSetEmbedding V G
 ```
 
+## SimpleGraph.edgeFinset
+
+`Mathlib/Combinatorics/SimpleGraph/Finite.lean`, line 59:
+
+```lean
+/-- The `edgeSet` of the graph as a `Finset`. -/
+def edgeFinset : Finset (Sym2 V) :=
+  Set.toFinset G.edgeSet
+```
+
 ## Set.encard
 
 `Mathlib/Data/Set/Card.lean`, line 67:
@@ -179,6 +189,15 @@ def CliqueFree (n : ℕ) : Prop :=
   ∀ t, ¬G.IsNClique n t
 ```
 
+## SimpleGraph.cliqueFinset
+
+`Mathlib/Combinatorics/SimpleGraph/Clique.lean`, line 854:
+
+```lean
+/-- The `n`-cliques in a graph as a finset. -/
+def cliqueFinset (n : ℕ) : Finset (Finset α) := {s | G.IsNClique n s}
+```
+
 ## SimpleGraph.Coloring
 
 `Mathlib/Combinatorics/SimpleGraph/Coloring/Vertex.lean`, line 74:
@@ -199,6 +218,55 @@ abbrev Coloring (α : Type v) := G →g completeGraph α
 def Colorable (n : ℕ) : Prop := Nonempty (G.Coloring (Fin n))
 ```
 
+## SimpleGraph.Hom
+
+`Mathlib/Combinatorics/SimpleGraph/Maps.lean`, line 293:
+
+```lean
+/-- A graph homomorphism is a map on vertex sets that respects adjacency relations.
+
+The notation `G →g G'` represents the type of graph homomorphisms. -/
+abbrev Hom :=
+  RelHom G.Adj G'.Adj
+```
+
+## RelHom
+
+`Mathlib/Order/RelIso/Basic.lean`, line 46:
+
+```lean
+/-- A relation homomorphism with respect to a given pair of relations `r` and `s`
+is a function `f : α → β` such that `r a b → s (f a) (f b)`. -/
+structure RelHom {α β : Type*} (r : α → α → Prop) (s : β → β → Prop) where
+  /-- The underlying function of a `RelHom` -/
+  toFun : α → β
+  /-- A `RelHom` sends related elements to related elements -/
+  map_rel' : ∀ {a b}, r a b → s (toFun a) (toFun b)
+```
+
+## SimpleGraph.Copy
+
+`Mathlib/Combinatorics/SimpleGraph/Copy.lean`, line 84:
+
+```lean
+/-- The type of copies as a subtype of *injective* homomorphisms. -/
+structure Copy (H : SimpleGraph W) (G : SimpleGraph V) where
+  /-- A copy gives rise to a homomorphism. -/
+  toHom : H →g G
+  injective' : Injective toHom
+```
+
+## SimpleGraph.IsContained
+
+`Mathlib/Combinatorics/SimpleGraph/Copy.lean`, line 239:
+
+```lean
+/-- The relation `IsContained H G`, `H ⊑ G` says that `G` contains a copy of `H`.
+
+This is equivalent to the existence of an isomorphism from `H` to a subgraph of `G`. -/
+abbrev IsContained (H : SimpleGraph W) (G : SimpleGraph V) := Nonempty (Copy H G)
+```
+
 ## SimpleGraph.turanGraph
 
 `Mathlib/Combinatorics/SimpleGraph/Extremal/Turan.lean`, line 63:
@@ -215,4 +283,93 @@ def turanGraph (n r : ℕ) : SimpleGraph (Fin n) where Adj v w := v % r ≠ w % 
 ```lean
 /-- The number of edges in `turanGraph n r`. -/
 abbrev turanNumber (n r : ℕ) : ℕ := #(turanGraph n r).edgeFinset
+```
+
+## Rel.interedges
+
+`Mathlib/Combinatorics/SimpleGraph/Density.lean`, line 49:
+
+```lean
+/-- Finset of edges of a relation between two finsets of vertices. -/
+def interedges (s : Finset α) (t : Finset β) : Finset (α × β) := {e ∈ s ×ˢ t | r e.1 e.2}
+```
+
+## Rel.edgeDensity
+
+`Mathlib/Combinatorics/SimpleGraph/Density.lean`, line 52:
+
+```lean
+/-- Edge density of a relation between two finsets of vertices. -/
+def edgeDensity (s : Finset α) (t : Finset β) : ℚ := #(interedges r s t) / (#s * #t)
+```
+
+## SimpleGraph.interedges
+
+`Mathlib/Combinatorics/SimpleGraph/Density.lean`, line 280:
+
+```lean
+/-- Finset of edges of a relation between two finsets of vertices. -/
+def interedges (s t : Finset α) : Finset (α × α) :=
+  Rel.interedges G.Adj s t
+```
+
+## SimpleGraph.edgeDensity
+
+`Mathlib/Combinatorics/SimpleGraph/Density.lean`, line 284:
+
+```lean
+/-- Density of edges of a graph between two finsets of vertices. -/
+def edgeDensity : Finset α → Finset α → ℚ :=
+  Rel.edgeDensity G.Adj
+```
+
+## SimpleGraph.IsUniform
+
+`Mathlib/Combinatorics/SimpleGraph/Regularity/Uniform.lean`, line 61:
+
+```lean
+/-- A pair of finsets of vertices is `ε`-uniform (aka `ε`-regular) iff their edge density is close
+to the density of any big enough pair of subsets. Intuitively, the edges between them are
+random-like. -/
+def IsUniform (s t : Finset α) : Prop :=
+  ∀ ⦃s'⦄, s' ⊆ s → ∀ ⦃t'⦄, t' ⊆ t → (#s : 𝕜) * ε ≤ #s' →
+    (#t : 𝕜) * ε ≤ #t' → |(G.edgeDensity s' t' : 𝕜) - (G.edgeDensity s t : 𝕜)| < ε
+deriving Decidable
+```
+
+## SimpleGraph.deleteEdges
+
+`Mathlib/Combinatorics/SimpleGraph/DeleteEdges.lean`, line 46:
+
+```lean
+/-- Given a set of vertex pairs, remove all of the corresponding edges from the
+graph's edge set, if present.
+
+See also: `SimpleGraph.Subgraph.deleteEdges`. -/
+def deleteEdges (s : Set (Sym2 V)) : SimpleGraph V := G \ fromEdgeSet s
+```
+
+## SimpleGraph.DeleteFar
+
+`Mathlib/Combinatorics/SimpleGraph/DeleteEdges.lean`, line 222:
+
+```lean
+/-- A graph is `r`-*delete-far* from a property `p` if we must delete at least `r` edges from it to
+get a graph with the property `p`. -/
+def DeleteFar (p : SimpleGraph V → Prop) (r : 𝕜) : Prop :=
+  ∀ ⦃s⦄, s ⊆ G.edgeFinset → p (G.deleteEdges s) → r ≤ #s
+```
+
+## Fintype.piFinset
+
+`Mathlib/Data/Fintype/Pi.lean`, line 32:
+
+```lean
+/-- Given for all `a : α` a finset `t a` of `δ a`, then one can define the
+finset `Fintype.piFinset t` of all functions taking values in `t a` for all `a`. This is the
+analogue of `Finset.pi` where the base finset is `univ` (but formally they are not the same, as
+there is an additional condition `i ∈ Finset.univ` in the `Finset.pi` definition). -/
+def piFinset (t : ∀ a, Finset (δ a)) : Finset (∀ a, δ a) :=
+  (Finset.univ.pi t).map ⟨fun f a => f a (mem_univ a), fun _ _ =>
+    by simp +contextual [funext_iff]⟩
 ```

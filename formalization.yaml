@@ -2,17 +2,22 @@
 version: "v0.4"
 
 project:
-  name: "Füredi's stability theorem for Turán's theorem"
+  name: "Füredi's stability theorem and the Erdős–Simonovits stability theorem"
   description: >-
-    A Lean 4 / Mathlib formalization of Füredi's sharp stability theorem for cliques: a
-    K_{p+1}-free graph on n vertices with at least t(n, p) − t edges (t(n, p) the number of edges
-    of the Turán graph) has a p-partite subgraph with at least e(G) − t edges. The proof goes
-    through Füredi's partition inequality e(G) + Σᵢ e(G[Vᵢ]) ≤ e(K(V₁, …, V_p)), which also gives
-    a partition with at most t edges inside the parts and edit distance at most 3t to a complete
-    p-partite graph. As a corollary, the Erdős–Simonovits stability theorem for cliques: for every
-    ε > 0 there is δ > 0 such that every K_{p+1}-free graph with at least (1 − 1/p) n²/2 − δn²
-    edges differs from a complete p-partite graph in at most εn² edges. Mathlib has Turán's
-    theorem but no stability results.
+    A Lean 4 / Mathlib formalization of the stability theory of Turán's theorem. (1) Füredi's
+    sharp stability theorem for cliques: a K_{p+1}-free graph on n vertices with at least
+    t(n, p) − t edges (t(n, p) the number of edges of the Turán graph) has a p-partite subgraph
+    with at least e(G) − t edges, via Füredi's partition inequality
+    e(G) + Σᵢ e(G[Vᵢ]) ≤ e(K(V₁, …, V_p)); also edit distance at most 3t to a complete p-partite
+    graph. (2) The Erdős–Simonovits stability theorem for every forbidden graph L with
+    χ(L) ≤ p + 1: for every ε > 0 there are δ > 0 and n₀ such that every L-free graph on n ≥ n₀
+    vertices with at least (1 − 1/p) n²/2 − δn² edges differs from a complete p-partite graph in
+    at most εn² edges, derived as in Füredi's paper from the regularity method. For this, the
+    project extends Mathlib's regularity theory, which only treats triangles, with (3) the clique
+    counting lemma in ε-uniform parts, (4) the clique removal lemma (fewer than δn^r copies of K_r
+    can be destroyed by deleting fewer than εn² edges) and (5) the embedding lemma for any fixed
+    graph with a proper colouring into pairwise uniform dense parts. Mathlib has Turán's theorem,
+    Szemerédi's regularity lemma and triangle counting/removal, but none of (1)–(5).
   authors:
     - "Juan Pablo Traverso Gianini"
   license: "Apache-2.0"
@@ -21,7 +26,7 @@ project:
 
 classification:
   arxiv: ["math.CO"]
-  msc2020: ["05C35"]
+  msc2020: ["05C35", "05C75"]
 
 sources:
   - title: "A proof of the stability of extremal graphs, Simonovits' stability from Szemerédi's regularity"
@@ -32,10 +37,10 @@ sources:
     location: "Journal of Combinatorial Theory, Series B 115 (2015), 66–71"
     relationship: "formalizes"
     note: >-
-      Theorem (K_{p+1}-free graphs with e(T_{n,p}) − t edges have a p-partite subgraph with at
-      least e(G) − t edges) and its proof via the greedy maximum-degree partition. The paper's
-      corollary for general forbidden graphs L with χ(L) = p + 1, which uses the removal lemma,
-      is not formalized here; the clique case of the Erdős–Simonovits theorem is.
+      The Theorem (K_{p+1}-free graphs with e(T_{n,p}) − t edges have a p-partite subgraph with at
+      least e(G) − t edges) with its greedy maximum-degree proof, and the derivation of
+      Simonovits' stability theorem for general forbidden graphs from it via the regularity
+      method (here through the reduced graph and the embedding lemma).
     license: "all rights reserved"
     author_endorsement: "not-contacted"
   - title: "A method for solving extremal problems in graph theory, stability problems"
@@ -44,7 +49,7 @@ sources:
     type: "paper"
     location: "Theory of Graphs (Proc. Colloq., Tihany, 1966), Academic Press, New York (1968), 279–319"
     relationship: "formalizes"
-    note: "The stability theorem (with Erdős), formalized here for forbidden cliques; no DOI."
+    note: "The stability theorem (with Erdős); no DOI."
     license: "all rights reserved"
     author_endorsement: "not-contacted"
   - title: "Some recent results on extremal problems in graph theory"
@@ -56,12 +61,40 @@ sources:
     note: "Erdős's announcement of the stability theorem; no DOI."
     license: "all rights reserved"
     author_endorsement: "n/a"
+  - title: "The asymptotic number of graphs not containing a fixed subgraph and a problem for hypergraphs having no exponent"
+    authors:
+      - "Paul Erdős"
+      - "Péter Frankl"
+      - "Vojtěch Rödl"
+    id: "doi:10.1007/BF01788085"
+    type: "paper"
+    location: "Graphs and Combinatorics 2 (1986), 113–121"
+    relationship: "formalizes"
+    note: "The graph removal lemma, formalized here for cliques K_r (clique counting and clique removal)."
+    license: "all rights reserved"
+    author_endorsement: "n/a"
+  - title: "Formalising Szemerédi's Regularity Lemma in Lean"
+    authors:
+      - "Yaël Dillies"
+      - "Bhavik Mehta"
+    id: "doi:10.4230/LIPIcs.ITP.2022.9"
+    type: "paper"
+    location: "13th International Conference on Interactive Theorem Proving (ITP 2022), LIPIcs 237, 9:1–9:19"
+    relationship: "background"
+    note: >-
+      Mathlib's regularity lemma, triangle counting and triangle removal, which the clique
+      counting, clique removal and embedding lemmas generalise and reuse.
+    license: "CC-BY-4.0"
+    author_endorsement: "not-contacted"
 
 status:
   scope: >-
     Proved for every finite vertex type, every p ≥ 1 and every t ≥ 0 (Füredi's theorem, the
-    partition inequality and the edit-distance form), and for every p ≥ 1 and ε > 0, uniformly
-    over all finite graphs (Erdős–Simonovits stability for K_{p+1}).
+    partition inequality and the edit-distance form); for every p ≥ 1 and ε > 0 (stability for
+    K_{p+1}, uniformly over all finite graphs); for every finite (p + 1)-colourable L, p ≥ 1 and
+    ε > 0, for graphs on at least n₀ vertices (general Erdős–Simonovits stability); for every
+    clique size r (counting and removal lemmas); and for every finite graph with a proper
+    colouring (embedding lemma).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -72,22 +105,27 @@ automation:
       models: ["Aristotle (Harmonic)"]
       framework: "Aristotle CLI"
       tool_setup: >-
-        Produced all proofs in one run from the formal statements and a proof plan; the return was
-        audited (statements and headers unchanged, no added axioms) and rebuilt locally.
+        Produced the proofs in five runs (Füredi; clique counting; clique removal; embedding;
+        general stability), each from formal statements and a proof plan that reused Mathlib's
+        regularity and triangle-removal developments and the previously proved files; each
+        return was audited (statements and headers unchanged, no added axioms) and rebuilt
+        locally. In the counting run Aristotle found that a first draft of the robust-density
+        counting statement was false without the hypothesis η ≤ 1 and gave a machine-checked
+        counterexample; the statement was corrected.
       cost:
-        wall_time: "under one hour"
+        wall_time: "about four hours in total"
         spend_usd: "not tracked"
         hardware: "API-only"
-      prompting_notes: "Formal statements and proof plan supplied."
+      prompting_notes: "Formal statements and proof plans supplied."
     - method: "agent"
       models: ["Claude Opus 5.5"]
       framework: "Claude Code (Anthropic)"
       tool_setup: >-
-        Statement design, proof plan, integration and review of the Aristotle return, and the
+        Statement design, proof plans, integration and review of the Aristotle returns, and the
         Palomar packaging, checked with `lake build` and `#print axioms` (Lean v4.35.0-rc3,
         Mathlib c55e6e786f49471c72fbddbec5415808896aec1e).
       cost:
-        wall_time: "about one hour"
+        wall_time: "about three hours"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: "Natural-language instructions in Spanish, directed by the author."
@@ -99,14 +137,18 @@ automation:
 
 fidelity:
   divergences: >-
-    Edge counts are `Set.ncard` of Mathlib's `edgeSet`; t(n, p) is Mathlib's `turanNumber n p`
-    (edges of `turanGraph n p`). A p-partition is a map f : V → Fin p, its complete p-partite
-    graph is `(⊤ : SimpleGraph (Fin p)).comap f`, the edges of G inside the parts are those of
-    `G \ ⊤.comap f`, and the edit distance is the edge count of the symmetric difference. A
-    "p-partite subgraph" is a subgraph H ≤ G with `H.Colorable p`. The hypothesis is stated as
-    t(n, p) ≤ e(G) + t (equivalent to e(G) ≥ t(n, p) − t). The stability theorem is formalized
-    only for forbidden cliques K_{p+1}, with the explicit dependence δ = ε/3 hidden behind the
-    existential; the general forbidden-graph version (via the removal lemma) is not included.
+    Edge counts are `Set.ncard` of Mathlib's `edgeSet` (or `edgeFinset` cards in the removal
+    lemma, as in Mathlib's triangle removal lemma); t(n, p) is Mathlib's `turanNumber n p`. A
+    p-partition is a map f : V → Fin p, its complete p-partite graph is
+    `(⊤ : SimpleGraph (Fin p)).comap f`, the edges inside the parts are those of `G \ ⊤.comap f`,
+    and the edit distance is the edge count of the symmetric difference. A "p-partite subgraph" is
+    H ≤ G with `H.Colorable p`. Füredi's hypothesis is stated as t(n, p) ≤ e(G) + t. In the general
+    stability theorem the forbidden graph is any L with `L.Colorable (p + 1)` (χ(L) ≤ p + 1),
+    containment is Mathlib's `IsContained`, and the conclusion holds for n ≥ n₀ (necessary: e.g.
+    K_n with p ≤ n < |V(L)| is L-free, dense and far from p-partite). The counting lemma is stated
+    for parts given by s : Fin r → Finset α with transversal tuples in `Fintype.piFinset s`, with
+    the explicit bound d^(r choose 2) / 2^r · ∏ #(s i) under 2 r η ≤ d^(r−1); the removal lemma
+    and the stability theorems give only existential constants.
 
 review:
   status: "agent-reviewed"
@@ -114,12 +156,14 @@ review:
     - "Claude Opus 5.5 (AI agent in Claude Code, acting for the author)"
   notes: >-
     Agent review by Claude Opus 5.5, distinct from the mechanical verification: the agent
-    compared the statements with Füredi's theorem and the Erdős–Simonovits theorem, checked that
-    the Aristotle return left every statement and header unchanged, and confirmed by `lake build`,
-    `#print axioms` and a comparison of the fully elaborated Challenge and Solution types that the
-    proofs use no `sorry` and only propext, Classical.choice and Quot.sound. The author directed
-    the work and approved the statements. No independent human mathematical review has been
-    performed. The results are known; no mathematical novelty is claimed.
+    compared the statements with Füredi's theorem, the Erdős–Simonovits theorem and the standard
+    counting, removal and embedding lemmas, checked edge cases (which led to the hypotheses
+    η ≤ 1, d ≤ 1 and n ≥ n₀), checked that each Aristotle return left every statement and header
+    unchanged, and confirmed by `lake build`, `#print axioms` and a comparison of the fully
+    elaborated Challenge and Solution types that the proofs use no `sorry` and only propext,
+    Classical.choice and Quot.sound. The author directed the work and approved the statements.
+    No independent human mathematical review has been performed. The results are known; no
+    mathematical novelty is claimed.
 
 alignment:
   namespace: "TuranStability"
@@ -140,6 +184,43 @@ alignment:
       lean: "TuranStability.erdos_simonovits_stability"
       module: "Challenge"
       status: "proved"
+    - source: "Clique counting lemma, robust-density form"
+      lean: "TuranStability.card_transversalCliques_ge"
+      module: "Challenge"
+      status: "proved"
+    - source: "Clique counting lemma, ε-uniform form"
+      lean: "TuranStability.card_transversalCliques_ge_of_isUniform"
+      module: "Challenge"
+      status: "proved"
+    - source: "Clique counting lemma, number of r-cliques"
+      lean: "TuranStability.card_cliqueFinset_ge"
+      module: "Challenge"
+      status: "proved"
+    - source: "Erdős–Frankl–Rödl (1986), removal lemma for K_r, far form"
+      lean: "TuranStability.le_card_cliqueFinset_of_deleteFar"
+      module: "Challenge"
+      status: "proved"
+    - source: "Erdős–Frankl–Rödl (1986), removal lemma for K_r"
+      lean: "TuranStability.clique_removal"
+      module: "Challenge"
+      status: "proved"
+    - source: "Embedding lemma (key lemma of the regularity method), robust-density form"
+      lean: "TuranStability.exists_embedding"
+      module: "Challenge"
+      status: "proved"
+    - source: "Embedding lemma, ε-uniform form"
+      lean: "TuranStability.exists_embedding_of_isUniform"
+      module: "Challenge"
+      status: "proved"
+    - source: "Embedding lemma, containment form"
+      lean: "TuranStability.isContained_of_isUniform"
+      module: "Challenge"
+      status: "proved"
+    - source: "Erdős (1967) / Simonovits (1968) stability theorem for χ(L) ≤ p + 1, via Füredi (2015)"
+      lean: "TuranStability.stability"
+      module: "Challenge"
+      status: "proved"
 
 acknowledgements: >-
-  Mathlib and the Lean community; Harmonic's Aristotle.
+  Mathlib and the Lean community, in particular Yaël Dillies and Bhavik Mehta's formalization of
+  the regularity lemma and triangle removal; Harmonic's Aristotle.
